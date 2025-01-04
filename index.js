@@ -1,6 +1,6 @@
 const express = require('express')
 const cors = require('cors')
-const { MongoClient, ServerApiVersion } = require('mongodb')
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb')
 require('dotenv').config()
 
 const port = process.env.PORT || 5050
@@ -23,7 +23,43 @@ const client = new MongoClient(uri, {
 
 async function run() {
   try {
-    
+
+    const db = client.db('suggestify-db')
+    const queryCollection = db.collection('query')
+
+
+    // POST a query in db 
+    app.post('/add-query', async(req, res)=>{
+        const queryData = req.body
+        const result = await queryCollection.insertOne(queryData)
+        console.log(result)
+        res.send(result)
+    })
+
+
+    // READ all query data from db
+    app.get('/queries', async(req, res)=>{
+        const result = await queryCollection.find().toArray()
+        res.send(result)
+    })
+
+
+    // READ all posted query by specific user (their email)
+    app.get('/queries/:email', async(req, res)=>{
+      const email = req.params.email;
+      const query = { 'user.email':email}
+      const result = await queryCollection.find(query).toArray()
+      res.send(result)
+    })
+
+
+    // delete a query from db
+    app.delete('query/:id', async (req, res) => {
+        const id = req.params.id;
+        const query = {_id: new ObjectId(id)}
+        const result = await queryCollection.deleteOne(query)
+        res.send(result)      
+    })
 
 
 
