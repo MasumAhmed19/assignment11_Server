@@ -47,17 +47,25 @@ async function run() {
     // READ all posted query by specific user (their email)
     app.get('/queries/:email', async(req, res)=>{
       const email = req.params.email;
-      const query = { 'user.email':email}
+      const query = { 'queryer.email':email}
+      const result = await queryCollection.find(query).toArray()
+      res.send(result)
+    })
+
+    // READ all posted query by specific user (post id)
+    app.get('/query/:id', async(req, res)=>{
+      const id = req.params.id;
+      const query = {_id: new ObjectId(id)}
       const result = await queryCollection.find(query).toArray()
       res.send(result)
     })
 
 
     // delete a query from db
-    app.delete('query/:id', async (req, res) => {
+    app.delete('/delete/:id', async (req, res) => {
         const id = req.params.id;
-        const query = {_id: new ObjectId(id)}
-        const result = await queryCollection.deleteOne(query)
+        const filter = {_id: new ObjectId(id)}
+        const result = await queryCollection.deleteOne(filter)
         res.send(result)      
     })
 
@@ -75,7 +83,7 @@ async function run() {
 }
 run().catch(console.dir)
 app.get('/', (req, res) => {
-  res.send('Hello from SoloSphere Server....')
+  res.send('Hello from Suggestify Server....')
 })
 
 app.listen(port, () => console.log(`Server running on port ${port}`))
