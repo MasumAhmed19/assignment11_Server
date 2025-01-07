@@ -26,6 +26,7 @@ async function run() {
 
     const db = client.db('suggestify-db')
     const queryCollection = db.collection('query')
+    const recomCollection = db.collection('recommendation')
 
 
     // POST a query in db 
@@ -85,6 +86,21 @@ async function run() {
     })
 
 
+    // post recommendation: CREATE
+    app.post('/add-recommendation', async (req, res)=>{
+      const data = req.body
+      const result = await recomCollection.insertOne(result)
+      res.send(result)
+      console.log(result);
+    })
+
+    // read all recommendation for each query id
+    app.get('/all-recommendations/:id', async (req, res)=>{
+      const id = req.params.id;
+      const filter = {querierID: new ObjectId(id)}
+      const result = await  recomCollection.find(filter).toArray()
+      res.send(result)
+    })
 
 
     // Send a ping to confirm a successful connection
