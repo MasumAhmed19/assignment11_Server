@@ -89,18 +89,55 @@ async function run() {
     // post recommendation: CREATE
     app.post('/add-recommendation', async (req, res)=>{
       const data = req.body
-      const result = await recomCollection.insertOne(result)
-      res.send(result)
-      console.log(result);
+      const result = await recomCollection.insertOne(data)
+
+
+      // recommendationCount 1 inc krte hbe
+      if(result.acknowledged){
+        const filter = {_id: new ObjectId(data.querierID)}
+        const update = {
+          $inc:{recommendationCount: 1},
+        }
+
+        const updateRecomCount = await queryCollection.updateOne(filter, update)
+
+        res.send(result)
+      }else{
+        res.status(500).send({ error: 'Failed to add recommendation' });
+
+      }
     })
 
-    // read all recommendation for each query id
-    app.get('/all-recommendations/:id', async (req, res)=>{
-      const id = req.params.id;
-      const filter = {querierID: new ObjectId(id)}
+    // read all recommendation for each query id // prottek post er niche comment er jonne fetch krbo
+    app.get('/all-recommendations/:id', async (req, res) => {
+
+        const id = req.params.id;
+        // Filter using the querierID as a string
+        // const filter = { querierID: new ObjectId(id) }; kaj kore na eta
+        const filter = { querierID: id };
+        const result = await recomCollection.find(filter).toArray();
+        res.send(result);
+        console.log(result)
+    });
+    
+
+    // read all recommendation filtering the  recommer.email for My Recommendation page
+    app.get('/all-recommendations/:email', async (req, res)=>{
+      const email = req.params.email;
+      const filter = {'recommer.email': email}
       const result = await  recomCollection.find(filter).toArray()
       res.send(result)
     })
+
+    // read all recommendation filtering the  recommer.email for Recommendation for me page
+    app.get('/recommendations-for/:email', async (req, res)=>{
+      const email = req.params.email;
+      const filter = {'queryer.email': email}
+      const result = await  recomCollection.find(filter).toArray()
+      res.send(result)
+    })
+
+
 
 
     // Send a ping to confirm a successful connection
