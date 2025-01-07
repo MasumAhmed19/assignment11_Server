@@ -69,6 +69,21 @@ async function run() {
         res.send(result)      
     })
 
+    // update query data
+    app.put('/update-query/:id', async(req, res)=>{
+      const id=req.params.id;
+      const queryData = req.body;
+      const update= {
+        $set: queryData,
+      }
+
+      const filter = {_id: new ObjectId(id)}
+      const options = {upsert: true}
+      const result = await queryCollection.updateOne(filter, update, options)
+      console.log(result)
+      res.send(result)
+    })
+
 
 
 
