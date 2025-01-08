@@ -138,6 +138,11 @@ async function run() {
     // get searched queries
     app.get('/all-queries', async(req, res)=>{
       const search = req.query.search
+      const sort = req.query.sort
+      let options = {};
+
+      if (sort) options = { sort: { addedTime: sort === 'asc' ? 1 : -1 } }
+      
       let query = {
         queryTitle: {
           $regex: search,
@@ -145,7 +150,7 @@ async function run() {
         },
       }
 
-      const result = await queryCollection.find(query).toArray();
+      const result = await queryCollection.find(query, options).toArray();
       res.send(result)
     })
 
