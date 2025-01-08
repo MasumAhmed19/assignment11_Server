@@ -132,8 +132,54 @@ async function run() {
       
     });
 
+    // READ recom query by specific _id 
+    app.get('/recom/:id', async(req, res)=>{
+      const id = req.params.id;
+      const query = {_id: new ObjectId(id)}
+      const result = await recomCollection.find(query).toArray()
+      res.send(result)
+    })
+    
+
 
     // delete recommendations
+// delete recommendations
+app.delete('/rec-delete/:id', async (req, res) => {
+  const id = req.params.id;
+
+  try {
+    // Find the recommendation by ID to get querierID
+    const recommendation = await recomCollection.findOne({ _id: new ObjectId(id) });
+
+    if (!recommendation) {
+      return res.status(404).send({ error: 'Recommendation not found' });
+    }
+
+    // Delete the recommendation
+    const result = await recomCollection.deleteOne({ _id: new ObjectId(id) });
+
+    if (result.deletedCount === 1) {
+      // Decrement recommendationCount by 1 in queryCollection
+      const filter = { _id: new ObjectId(recommendation.querierID) };
+      const update = {
+        $inc: { recommendationCount: -1 },
+      };
+
+      const updateRecomCount = await queryCollection.updateOne(filter, update);
+
+      if (updateRecomCount.modifiedCount === 1) {
+        res.send({ success: true, message: 'Recommendation deleted and count decremented' });
+      } else {
+        res.send({ success: true, message: 'Recommendation deleted but count not updated' });
+      }
+    } else {
+      res.status(500).send({ error: 'Failed to delete recommendation' });
+    }
+  } catch (error) {
+    res.status(500).send({ error: 'Server error', details: error.message });
+  }
+});
+
 
     // get searched queries
     app.get('/all-queries', async(req, res)=>{
