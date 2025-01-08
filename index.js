@@ -133,6 +133,23 @@ async function run() {
     });
 
 
+    // delete recommendations
+
+    // get searched queries
+    app.get('/all-queries', async(req, res)=>{
+      const search = req.query.search
+      let query = {
+        queryTitle: {
+          $regex: search,
+          $options: 'i',
+        },
+      }
+
+      const result = await queryCollection.find(query).toArray();
+      res.send(result)
+    })
+
+
 
     // read all recommendation filtering the  recommer.email for "Recommendation for me" page
     app.get('/recommendations-for-me/:email', async (req, res)=>{
