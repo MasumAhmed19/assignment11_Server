@@ -122,15 +122,20 @@ async function run() {
     
 
     // read all recommendation filtering the  recommer.email for My Recommendation page
-    app.get('/all-recommendations/:email', async (req, res)=>{
-      const email = req.params.email;
-      const filter = {'recommer.email': email}
-      const result = await  recomCollection.find(filter).toArray()
-      res.send(result)
-    })
+    app.get('/my-recoms/:email', async (req, res) => {
+  
+        const email = req.params.email;
 
-    // read all recommendation filtering the  recommer.email for Recommendation for me page
-    app.get('/recommendations-for/:email', async (req, res)=>{
+        const filter = { 'recommer.email': email };
+        const result = await recomCollection.find(filter).toArray();
+        res.send(result);
+      
+    });
+
+
+
+    // read all recommendation filtering the  recommer.email for "Recommendation for me" page
+    app.get('/recommendations-for-me/:email', async (req, res)=>{
       const email = req.params.email;
       const filter = {'queryer.email': email}
       const result = await  recomCollection.find(filter).toArray()
