@@ -6,7 +6,14 @@ require('dotenv').config()
 const port = process.env.PORT || 5050
 const app = express()
 
-app.use(cors())
+const corsOptions = {
+  origin: ['http://localhost:5173', 'https://suggestify-28d19.web.app', 'https://suggestify-28d19.firebaseapp.com'],
+  credentials: true,
+  optionsSuccessStatus: 200,
+}
+
+
+app.use(cors(corsOptions))
 app.use(express.json())
 
 
@@ -33,7 +40,7 @@ async function run() {
     app.post('/add-query', async(req, res)=>{
         const queryData = req.body
         const result = await queryCollection.insertOne(queryData)
-        console.log(result)
+        // console.log(result)
         res.send(result)
     })
 
@@ -81,7 +88,7 @@ async function run() {
       const filter = {_id: new ObjectId(id)}
       const options = {upsert: true}
       const result = await queryCollection.updateOne(filter, update, options)
-      console.log(result)
+      // console.log(result)
       res.send(result)
     })
 
@@ -117,7 +124,7 @@ async function run() {
         const filter = { querierID: id };
         const result = await recomCollection.find(filter).toArray();
         res.send(result);
-        console.log(result)
+        // console.log(result)
     });
     
 
@@ -141,25 +148,26 @@ async function run() {
     })
     
 
-
     // delete recommendations
 // delete recommendations
 app.delete('/rec-delete/:id', async (req, res) => {
   const id = req.params.id;
 
   try {
-    // Find the recommendation by ID to get querierID
+    // ei is theke full recommer data nibo
     const recommendation = await recomCollection.findOne({ _id: new ObjectId(id) });
 
     if (!recommendation) {
       return res.status(404).send({ error: 'Recommendation not found' });
     }
 
-    // Delete the recommendation
+    // ei recommer id ta delete krbo
     const result = await recomCollection.deleteOne({ _id: new ObjectId(id) });
 
     if (result.deletedCount === 1) {
-      // Decrement recommendationCount by 1 in queryCollection
+      // jodi delete hoy, decrement kro
+
+      // recommendation theke querierId ta khujte hbe
       const filter = { _id: new ObjectId(recommendation.querierID) };
       const update = {
         $inc: { recommendationCount: -1 },
@@ -179,7 +187,6 @@ app.delete('/rec-delete/:id', async (req, res) => {
     res.status(500).send({ error: 'Server error', details: error.message });
   }
 });
-
 
     // get searched queries
     app.get('/all-queries', async(req, res)=>{
@@ -201,7 +208,6 @@ app.delete('/rec-delete/:id', async (req, res) => {
     })
 
 
-
     // read all recommendation filtering the  recommer.email for "Recommendation for me" page
     app.get('/recommendations-for-me/:email', async (req, res)=>{
       const email = req.params.email;
@@ -211,13 +217,11 @@ app.delete('/rec-delete/:id', async (req, res) => {
     })
 
 
-
-
     // Send a ping to confirm a successful connection
-    await client.db('admin').command({ ping: 1 })
-    console.log(
-      'Pinged your deployment. You successfully connected to MongoDB!'
-    )
+    // await client.db('admin').command({ ping: 1 })
+    // console.log(
+    //   'Pinged your deployment. You successfully connected to MongoDB!'
+    // )
   } finally {
     // Ensures that the client will close when you finish/error
   }
