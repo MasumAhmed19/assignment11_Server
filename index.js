@@ -125,6 +125,32 @@ async function run() {
       res.send(result);
     });
 
+    // query as per count of category
+    app.get('/query-count', async (req, res) => {
+      try {
+        const result = await queryCollection.aggregate([
+          {
+            $group: {
+              _id: "$queryCategory",
+              count: { $sum: 1 }
+            }
+          },
+          {
+            $project: {
+              _id: 0,
+              cateName: "$_id",
+              count: 1
+            }
+          }
+        ]).toArray();
+    
+        res.json(result);
+      } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Server Error" });
+      }
+    });
+
     // update query data
     app.put("/update-query/:id", async (req, res) => {
       const id = req.params.id;
